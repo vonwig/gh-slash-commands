@@ -1,0 +1,11 @@
+.cpcache
+.shadow-cljs
+index.js
+tests.js
+node_modules
+.idea
+*.iml
+.nrepl-port
+.atomist
+.clj-kondo
+**/.DS_Store

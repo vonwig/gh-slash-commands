@@ -1,0 +1,31 @@
+skill:
+  apiVersion: v2
+  # override name/namespace to provide non-default names
+  # name: default-name-will-be-github-org-name
+  namespace: atomist
+  displayName: "GitHub Comment Commands"
+  description: Search for commands in GitHub comments (pull requests and issues)
+  author: slimslenderslacks
+  license: Apache-2.0
+  iconUrl: https://raw.githubusercontent.com/vonwig/skill-sample-1/main/docs/images/icon.svg
+  homepageUrl: https://github.com/atomisthq/gh-slash-commands
+  longDescription: >
+    Add slash commands to Commit messages and Issue comments.
+
+    - `/pr --title 'New PR Title' --base main`
+    - `/label mylabel`
+  parameters:
+    - repoFilter:
+        name: repo-filter
+        required: true
+        description: "select repositories where comment commands will be active"
+    - stringArray:
+        name: active-commands
+        minRequired: 1
+        required: true
+        description: "regular expression to match any command string"
+    - string:
+        name: default-label-color
+        required: false
+        default: f29513
+        description: default color for labels

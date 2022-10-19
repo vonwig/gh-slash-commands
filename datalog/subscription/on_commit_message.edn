@@ -1,0 +1,23 @@
+[:find (pull ?commit [:git.commit/message
+                      :git.commit/sha
+                      {:git.commit/repo
+                       [:git.repo/name
+                        :git.repo/source-id
+                        :git.repo/default-branch
+                        {:git.repo/org
+                         [:git.org/source-id
+                          :git.org/name
+                          :github.org/installation-token]}]}
+                      {:git.commit/author
+                       [:git.user/name
+                        :git.user/login]}
+                      {:git.ref/_commit
+                       [:git.ref/name]}])
+ :in $ $b % ?ctx
+ :where
+ (push-tx ?ctx ?commit ?ref)
+ [?commit :git.commit/message ?message]
+ [?commit :git.commit/repo ?repo]
+ (skill-repo-selected? ?ctx ?repo)
+ (get-skill-config-value ?ctx "active-commands" "label" ?tag-matcher)
+ [((fn [s1 s2] (re-find (re-pattern (apply str (interpose "|" s2))) s1)) ?message ?tag-matcher)]]

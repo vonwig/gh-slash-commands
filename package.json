@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "clean": "rm -rf .lsp/ .clj-kondo/ .cpcache/ .shadow-cljs/",
+    "build:watch": "npm run clean; clj -M:shadow-cljs:build:test",
+    "build": "npm run clean; shadow-cljs release release -A:build"
+  },
+  "dependencies": {
+    "@atomist/api-cljs": "0.5.202",
+    "iconv-lite": "0.4.19"
+  },
+  "devDependencies": {
+    "shadow-cljs": "2.15.7",
+    "source-map-support": "^0.5.20",
+    "ws": "^7.5.3"
+  }
+}

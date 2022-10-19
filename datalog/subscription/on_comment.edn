@@ -1,0 +1,37 @@
+[:find (pull ?comment [:github.comment/body
+                       :github.comment/type
+                       :github.comment/source-id
+                       {:github.comment/issue
+                        [:github.pullrequest/number
+                         :github.pullrequest/source-id
+                         {:github.pullrequest/repo
+                          [:git.repo/name
+                           :git.repo/source-id
+                           :git.repo/default-branch
+                           {:git.repo/org
+                            [:git.org/source-id
+                             :git.org/name
+                             :github.org/installation-token]}]}
+                         :github.issue/number
+                         :github.issue/source-id
+                         {:github.issue/repo
+                          [:git.repo/name
+                           :git.repo/source-id
+                           :git.repo/default-branch
+                           {:git.repo/org
+                            [:git.org/source-id
+                             :git.org/name
+                             :github.org/installation-token]}]}]}
+                       {:github.comment/author
+                        [:git.user/name
+                         :git.user/login]}])
+ :in $ $b % ?ctx
+ :where
+ (attributes-tx ?ctx ?comment :github.comment/body ?body)
+ [?comment :github.comment/issue ?issue]
+ (or-join [?issue ?repo]
+          [?issue :github.pullrequest/repo ?repo] 
+          [?issue :github.issue/repo ?repo])
+ (skill-repo-selected? ?ctx ?repo)
+ (get-skill-config-value ?ctx "active-commands" "label" ?tag-matcher)
+ [((fn [s1 s2] (re-find (re-pattern (apply str (interpose "|" s2))) s1)) ?body ?tag-matcher)]]
