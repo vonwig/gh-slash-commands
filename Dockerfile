@@ -1,5 +1,5 @@
 # builder phase
-FROM gcr.io/atomist-container-skills/clojure-base:jdk17 AS builder
+FROM gcr.io/atomist-container-skills/clojure-base:jdk17@sha256:1fbb9c506a075c65bfb4b6977713b76549bee150884b8404acef51039191c194 AS builder
 
 WORKDIR /usr/src/app
 
