@@ -12,7 +12,7 @@ COPY src /usr/src/app/src
 RUN npx shadow-cljs release release -A:build
 
 # Skill runtime
-FROM alpine:3.15.1
+FROM alpine:3.15.1@sha256:d6d0a0eb4d40ef96f2310ead734848b9c819bb97c9d846385c4aca1767186cd4
 
 RUN apk update && apk add --update --no-cache nodejs-current=17.9.0-r0 npm=8.1.3-r0 git=2.34.5-r0
 WORKDIR /usr/src/app
