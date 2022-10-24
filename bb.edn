@@ -1,0 +1,57 @@
+{:tasks {:requires ([clojure.string :as str]
+                    [babashka.fs :as fs])
+         :init (do
+                 (def repository "gcr.io/atomist-skill-production/gh-slash-commands")
+                 (def team "T095SFFBK")
+                 (def bb-scripts "/Users/slim/atmhq/bb_scripts"))
+
+         -revision {:task (clojure.string/trim (:out (shell {:out :string} (format "git rev-parse HEAD"))))}
+
+         check-for-builder {:task (-> (shell "docker buildx inspect buildx-multi-arch"))}
+         setup-builder {:task (if (= 1 (:exit check-for-builder))
+                                (shell {:continue true} "docker buildx create --name=buildx-multi-arch --driver=docker-container --driver-opt=network=host")
+                                (println "buildx-multi-arch is already running"))
+                        :depends [check-for-builder]}
+         ;; experiment - can we build both arm64 and amd64 together
+         docker-buildx {:depends [setup-builder -revision]
+                        :task (shell (format "docker buildx build --builder=buildx-multi-arch --platform=linux/amd64,linux/arm64 --output=./docker-output --tag=%s --label=org.opencontainers.image.revision=%s,com.docker.image.source.entrypoint=Dockerfile ." repository -revision))}
+
+         ;; --- local image testing ---
+         ;; this is only for local testing - it will build arm64 if running on newer os x laptops and we can't push
+         ;; these images for use in cloudrun
+         docker-build {:depends [-revision]
+                       :task (shell (format "docker build --label org.opencontainers.image.revision=%s --label com.docker.image.source.entrypoint=Dockerfile --tag %s ." -revision repository))}
+         docker-push (shell (format "docker push %s" repository))
+         docker-run (shell (format "docker run --rm -p 8080:8080 %s" repository))
+
+         ;; remote skill registration - local testing only - will happen automatically when images are pushed to
+         ;; atomist-skill-production
+         -clean-dot-atomist (fs/delete-tree "./.atomist")
+         -bundle {:task (shell "atm-skill generate --no-validate --artifacts false")
+                  :depends [-clean-dot-atomist]}
+         -extract-digest (let [out (:out (shell {:out :string} (format "docker inspect --format '{{.RepoDigests}}' %s:latest" repository)))
+                               digest (second (re-find (re-pattern "\\[.*(sha256:.*)\\]") out))]
+                           (println "extracted " digest)
+                           digest)
+         -increment-skill-yaml-image-digest {:depends [-extract-digest]
+                                             :task (let [s (slurp "./.atomist/skill.yaml")
+                                                         output (str s (format "  artifacts:\n    docker:\n      - name: gh-slash-commands\n        image: %s@%s\n" repository -extract-digest))]
+                                                     (spit "./.atomist/skill.yaml" output))}
+         -describe (:out (shell {:continue true :out :string} "git describe --tags"))
+         -increment-version {:depends [-describe]
+                             :task (try (let [[_ a b c] (re-find (re-pattern "v?(\\d+)\\.(\\d+)\\.(\\d+)") (str/trim -describe))
+                                              major (Integer/parseInt a)
+                                              minor (Integer/parseInt b)
+                                              patch (Integer/parseInt c)
+                                              v (format "%d.%d.%d" major minor patch)]
+                                          (println "new version " v)
+                                          v)
+                                        (catch Throwable t "0.0.1"))}
+         -timestamp {:task (str (System/currentTimeMillis))}
+         -next-version {:depends [-increment-version -timestamp]
+                        :task (let [v (format "%s-%s" -increment-version -timestamp)]
+                                (println "next version " v)
+                                v)}
+         register {:depends [docker-build docker-push -next-version -bundle -increment-skill-yaml-image-digest]
+                   :task (let [basedir (str (fs/path (fs/file (System/getenv "PWD"))))]
+                           (shell {:dir bb-scripts} (format "bb cli register-skill --team %s --version %s --basedir %s" team -next-version basedir)))}}}

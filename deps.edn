@@ -15,14 +15,15 @@
 {:paths ["src"]
  :jvm-opts ["-Xss64m"]
  :deps
- {com.atomist/api-cljs {:mvn/version "0.5.242" #_#_:local/root "/Users/slim/atomisthq/api-cljs"}}
+ {com.atomist/api-cljs {:mvn/version "0.5.243" 
+                        #_#_:local/root "/Users/slim/atomisthq/api-cljs"}}
  :aliases
  {:build
   {:extra-deps
-   {org.clojure/clojure {:mvn/version "1.10.3"}
-    org.clojure/clojurescript {:mvn/version "1.10.879"}
-    com.google.javascript/closure-compiler-unshaded {:mvn/version "v20210505"}
-    thheller/shadow-cljs {:mvn/version "2.15.7"}}
+   {org.clojure/clojure {:mvn/version "1.11.1"}
+    org.clojure/clojurescript {:mvn/version "1.11.60"}
+    #_#_com.google.javascript/closure-compiler-unshaded {:mvn/version "v20210505"}
+    thheller/shadow-cljs {:mvn/version "2.20.6"}}
    :extra-paths ["dev"]}
   :shadow-cljs 
   {:extra-deps 

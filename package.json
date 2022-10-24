@@ -9,7 +9,7 @@
     "iconv-lite": "0.4.19"
   },
   "devDependencies": {
-    "shadow-cljs": "2.15.7",
+    "shadow-cljs": "^2.20.6",
     "source-map-support": "^0.5.20",
     "ws": "^7.5.3"
   }
