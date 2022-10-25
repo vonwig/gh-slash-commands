@@ -48,7 +48,7 @@
         (log/infof "ran %d commands" command-count)
         (assoc request
                :atomist/status
-               {:status :completed
+               {:state :completed
                 :reason (cond (seq errors)
                               (->> (interpose "," errors) (apply str))
                               (seq statuses)
