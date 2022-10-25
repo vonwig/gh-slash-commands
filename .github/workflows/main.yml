@@ -10,7 +10,7 @@ env:
   REGISTRY: gcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: atomist-container-skills/${{ github.repository }}
-  SHA: ${{ github.event.pull_request.head.sha || github.event.after }
+  SHA: ${{ github.event.pull_request.head.sha || github.event.after }}
 
 jobs:
   build:
