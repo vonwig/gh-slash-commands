@@ -1,5 +1,5 @@
 # builder phase
-FROM vonwig/clojure-base:jdk17
+FROM vonwig/clojure-base:jdk17 AS builder
 
 WORKDIR /usr/src/app
 
@@ -12,7 +12,7 @@ COPY src /usr/src/app/src
 RUN npx shadow-cljs release release -A:build
 
 # Skill runtime
-FROM alpine:3.15.1@sha256:525ce2f9b0d7f40dd7aaa177b44cf8ab2e0bdebb906a9f66aa36c32f7d934f67
+FROM alpine:3.15.1
 
 RUN apk update && apk add --update --no-cache nodejs-current=17.9.0-r0 npm=8.1.3-r0 git=2.34.5-r0
 WORKDIR /usr/src/app
