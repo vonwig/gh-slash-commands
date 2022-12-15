@@ -1,5 +1,5 @@
 # builder phase
-FROM
+FROM vonwig/clojure-base:jdk17
 
 WORKDIR /usr/src/app
 
